@@ -1,4 +1,4 @@
-from core.game import Game, Result
+from core.game import Game, Result, Move
 import logging
 
 logging.basicConfig(
@@ -50,18 +50,18 @@ def parse_property(game, my_data):
     def parse_result(value):
         res = Result()
         res.winner = value[0]
-        if value[1] == 'R':
+        if value[2] == 'R':
             res.resignation = True
         else:
             res.points = float(value[2:])
+
+        return res
             
     key, my_data = crunch_key(my_data)
-    logger.info("Key = " + key)
+    #logger.info("Key = " + key)
     val, my_data = crunch_value(my_data)
-    logger.info("Val = " + val)
+    #logger.info("Val = " + val)
 
-
-    
     if key == 'EV':
         game.event = val
     elif key == 'PB':
@@ -72,6 +72,15 @@ def parse_property(game, my_data):
         game.komi = float(val)
     elif key == 'RE':
         game.result  = parse_result(val)
+    
+    # game moves
+    elif key in ['B', 'W']:
+        move = Move()
+        move.value = val
+        move.seq_id = len(game.move_seq) 
+        game.move_seq.append(move)
+
+
 
     return my_data
 
@@ -87,23 +96,35 @@ def parse(file_data):
     Method: Naive. Look for (property, value) pairs.
     Errors out on incorrect syntax.
     '''
-    
+    logger.info('Parsing started')
+
     game = Game()
 
     # skip first two chars  - (;
     file_data = file_data[2:]
 
     cur_data = file_data
-    done = False
 
-    while not done: 
+    
+    while cur_data: 
         cur_data = parse_property(game, cur_data)
+        char = cur_data[0]
+        
+        # next independent char is semicolon
+        # that's a game node -> semicolon + property
+        if char == ';':
+            cur_data = cur_data[1:]
 
-
-
+        # next independent char is close param
+        # effectively, we've reached EOF
+        elif char == ')':
+            cur_data = ''
+    
+    logger.info('Parsing finished')
+    return game
 
 
 def parse_from_file(file_path):
     with open(file_path) as f:
-        data = ''.join(f.readlines())
+        data = ''.join([line.strip() for line in f.readlines()])
         return parse(data)

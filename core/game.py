@@ -13,8 +13,8 @@ class Move:
            location: pq, cd(3x4), etc.
            action: !! for pass
     """
-    seq_id: int         # sequence number in moveset
-    value: str          # e.g. cd for 3x4 komoku, !! for pass
+    seq_id: int  = -1   # sequence number in moveset
+    value: str  = '00'  # e.g. cd for 3x4 komoku, !! for pass
     
   
     def __repr__(self):
@@ -32,12 +32,12 @@ class Result:
     points = -1     # > 0. Valid only if resignation is false
 
     def __repr__(self):
-        ret = ('White' if winner == 'W' else 'Black') + ' wins by'
+        ret = ('White' if self.winner == 'W' else 'Black') + ' wins by'
 
-        if resignation:
+        if self.resignation:
             return ret + " resignation"
 
-        return f"{ret} {points} points"
+        return f"{ret} {self.points} points"
 
 
 
@@ -63,7 +63,8 @@ class Game:
             f"Event: {self.event}",
             f"Black: {self.player_names[0]}",
             f"White: {self.player_names[1]}",
-            f"Result: {self.result}"
+            f"Result: {self.result}",
+            f"</Game>"
         ])
 
 
