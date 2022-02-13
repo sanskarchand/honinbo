@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+import datetime
 
 # NOTE: intentionally omitting player id/indication (e.g. Black).
 # rationale: we know black goes first always (so odd seq id => white)
@@ -17,20 +18,59 @@ class Move:
     
   
     def __repr__(self):
-        pl = 'B'
-        if seq_id % 1 == 0:
-            pl = 'W'
+        pl = ['B', 'W'][seq_id % 2]
 
         return f'M<{self.req_id},{pl},{self.value}>'
-    
+        
+@dataclass
+class Result:
+    """
+    Records the result of a game
+    """
+    winner = 'W'    # 'W' | 'B'
+    resignation = False     # True if won by resignation
+    points = -1     # > 0. Valid only if resignation is false
+
+    def __repr__(self):
+        ret = ('White' if winner == 'W' else 'Black') + ' wins by'
+
+        if resignation:
+            return ret + " resignation"
+
+        return f"{ret} {points} points"
+
+
 
 class Game:
     """
     This class represents a Game of go.
-    The representation consists of the initial state,
+    The representation consists of 
     the sequence of moves, the outcome, and some
     metadata (e.g. players' names, ranks, etc.)
     """
 
-    def __init__(self, init_state, move_seq):
-        pass
+    def __init__(self):
+        self.move_seq = []
+        self.event = ''
+        self.date = datetime.datetime(1970, 1, 1)
+        self.player_names = ['PB', 'PW']
+        self.komi = -1
+        self.result = Result()
+
+    def __repr__(self):
+        return '\n'.join([
+            f"<Game>",
+            f"Event: {self.event}",
+            f"Black: {self.player_names[0]}",
+            f"White: {self.player_names[1]}",
+            f"Result: {self.result}"
+        ])
+
+
+    
+    '''
+    # NOTE: effectively replacing self. This is okay right?
+    @classmethod
+    def from_file(cls, sgf_file_path):
+        return parse_from_file(sgf_file_path)
+    '''

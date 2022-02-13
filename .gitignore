@@ -1,1 +1,5 @@
-Ten-2021-1.sgf
+*.sgf
+*.pyc
+*.log
+__pycache__/
+venv/
