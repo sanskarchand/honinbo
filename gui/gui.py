@@ -215,6 +215,7 @@ class Container(GUIElem):
         self.orientation = Orientation.HORIZONTAL
         self.direction = 1      # 1 for left-to-right, up-to-down. -1 for the opposite
         self.gap = 20
+        self.margin = (20, 0)
 
     def set_orientation(self, ori):
         self.orientation = ori
@@ -237,10 +238,9 @@ class Container(GUIElem):
             item.set_pos(self.pos)
             if self.direction == -1:
                 if self.orientation == Orientation.HORIZONTAL:
-                    item.set_pos((item.pos[0] - item.width, item.pos[1]))
+                    pos = self.pos[0] - item.width, self.pos[1]
                 else:
-                    item.set_pos((item.pos[0], item.pos[1] - item.height))
-
+                    pos = self.pos[0], self.pos[1] - item.height
 
         self.items.append(item)
 

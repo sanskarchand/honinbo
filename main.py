@@ -8,6 +8,7 @@ def main():
     print(g)
 
     dw = DisplayWindow()
+    dw.set_game(g)
     dw.mainloop()
 
 
