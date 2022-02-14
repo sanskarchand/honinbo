@@ -4,7 +4,6 @@ import logging
 logging.basicConfig(
     filename=f'{__name__}.log', 
     format='%(asctime)s %(message)s',
-    encoding='utf-8', 
     level=logging.DEBUG
 )
 logger = logging.getLogger(__name__)

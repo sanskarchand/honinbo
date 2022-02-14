@@ -63,6 +63,7 @@ class Game:
             f"Event: {self.event}",
             f"Black: {self.player_names[0]}",
             f"White: {self.player_names[1]}",
+            f"Moves: {len(self.move_seq)}",
             f"Result: {self.result}",
             f"</Game>"
         ])
