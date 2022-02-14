@@ -1,4 +1,5 @@
 from utils.bitset import BitSet
+import const
 import pygame as pg
 from enum import IntFlag
 from dataclasses import dataclass
@@ -23,9 +24,16 @@ class GUIElem:
 
         self.rect = pg.rect.Rect(self.pos[0], self.pos[1], width, height)
 
+    def set_pos(self, pos):
+        self.pos = pos
+        self.rect.x, self.rect.y = pos
+
     def set_callback(self, func, args_tuple):
         """
         Returns self; for method chaining
+        NOTE: if there is only one arg, make sure to write the
+              tuple like so : (x,) [otherwise, it's just evaluated
+              as an expression]
         """
         self.callback = func
         self.callback_args = args_tuple
@@ -74,7 +82,7 @@ class GUIElem:
             self.state.clear(ElemState.PRESSED)
             self.state.clear(ElemState.HOVER)
 
-class  ElemState(IntFlag):
+class ElemState(IntFlag):
     """
     If PRESSED isn't present in a flag bitset,
     it means the element is raised
@@ -82,6 +90,12 @@ class  ElemState(IntFlag):
     NONE = 0x0 
     PRESSED = 0x1       
     HOVER = 0x2 
+
+# for containers
+class Orientation(IntFlag):
+    NULL = 0x0
+    HORIZONTAL = 0x1
+    VERTICAL = 0x2
     
 
 class Color:
@@ -106,13 +120,10 @@ class Color:
         return cls(r, g, b) 
 
 
-
-
-
 @dataclass
 class GUIStyle:
     bg_color = Color()
-    bg_hover_color = Color.new_scaled(1.2, bg_color)    # lightened
+    bg_hover_color = None           # overrides default lightened color if set
     fg_color = Color(255, 255, 255)
     
     font = 'Envy Code R Regular'    # string - system font name
@@ -137,8 +148,9 @@ class Button(GUIElem):
 
     def draw(self):
         color = self.style.bg_color
+
         if self.state.test(ElemState.HOVER):
-            color = self.style.bg_hover_color
+            color = Color.new_scaled(1.2, color)
         # darkened color
         if self.state.test(ElemState.PRESSED):
             color = Color.new_scaled(0.8, color)
@@ -176,8 +188,9 @@ class TextButton(Button):
         text_surface = self.font.render(self.text, False, self.style.font_color.raw)
 
         # center the text
-        textpos_x = self.pos[0] + (self.rect.width - text_surface.get_rect().width)/2
-        textpos_y = self.pos[1] + (self.rect.height - text_surface.get_rect().height)/2
+        textpos_x = int( self.pos[0] + (self.rect.width - text_surface.get_rect().width)/2 )
+        textpos_y = int( self.pos[1] + (self.rect.height - text_surface.get_rect().height)/2 )
+
         
         self.screen.blit(text_surface, (textpos_x, textpos_y))
 
@@ -194,25 +207,91 @@ class DialogBox(GUIElem):
         self.ok_button = None
 
 
+### Containers
+class Container(GUIElem):
+    def __init__(self, screen, pos, width, height):
+        super().__init__(screen, pos, width, height)
+        self.items = []
+        self.orientation = Orientation.HORIZONTAL
+        self.direction = 1      # 1 for left-to-right, up-to-down. -1 for the opposite
+        self.gap = 20
+
+    def set_orientation(self, ori):
+        self.orientation = ori
+        return self
+
+    def push_items(self, *items):
+        for item in items:
+            self.push_item(item)
+
+    def push_item(self, item):
+        if self.items:
+            last_item = self.items[-1]
+            if self.orientation == Orientation.HORIZONTAL:
+                new_x = last_item.pos[0] + (self.direction) * (last_item.width + self.gap)
+                item.set_pos((new_x, last_item.pos[1]))
+            else:
+                new_y = last_item.pos[1] + (self.direction) * (last_item.height + self.gap)
+                item.set_pos((last_item.pos[0], new_y))
+        else:
+            item.set_pos(self.pos)
+            if self.direction == -1:
+                if self.orientation == Orientation.HORIZONTAL:
+                    item.set_pos((item.pos[0] - item.width, item.pos[1]))
+                else:
+                    item.set_pos((item.pos[0], item.pos[1] - item.height))
+
+
+        self.items.append(item)
+
+    def pop_item(self):
+        return self.items.pop()
+
+    def update(self, event, mouse_pos):
+        for item in self.items:
+            item.update(event, mouse_pos)
+
+    def draw(self):
+        for item in self.items:
+            item.draw()
+
+        if const.DEBUG_DRAW:
+            rect = pg.Rect(self.rect.x, self.rect.y, self.rect.width, self.rect.height)
+            if self.direction == -1:
+                if self.orientation == Orientation.HORIZONTAL:
+                    rect.x -= rect.width
+                else:
+                    rect.y -= rect.height
+
+            pg.draw.rect(self.screen, (0, 0, 255), rect, 2)
+
+    
+
 class GUI:
 
     def __init__(self, screen):
         self.screen = screen
         self.elems = []
 
-    def add_button(self, pos, width, height, callback, callback_args):
-        self.elems.append(
-            Button(self.screen, pos, width, height)
-             .set_callback(callback, callback_args))
-        return self.elems[-1]
+    def add_elem(self, elem):
+        self.elems.append(elem)
 
-    def add_text_button(self, pos, width, height, text, callback, callback_args):
-        self.elems.append(
-            TextButton(self.screen, pos, width, height, text)
-             .set_callback(callback, callback_args))
+    def make_horizontal_container(self, pos, width, height):
+        return (Container(self.screen, pos, width, height)
+                .set_orientation(Orientation.HORIZONTAL))
+    
+    def make_vertical_container(self, pos, width, height):
+        return (Container(self.screen, pos, width, height)
+                .set_orientation(Orientation.VERTICAL))
+
+    def make_button(self, pos, width, height, callback, callback_args):
+        return (Button(self.screen, pos, width, height)
+                .set_callback(callback, callback_args))
+
+    def make_text_button(self, pos, width, height, text, callback, callback_args):
+        return (TextButton(self.screen, pos, width, height, text)
+                .set_callback(callback, callback_args))
         
-        return self.elems[-1]
-
     def update(self, event, mouse_pos):
         for elem in self.elems:
             elem.update(event, mouse_pos)
