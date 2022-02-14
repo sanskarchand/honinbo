@@ -21,7 +21,9 @@ class DisplayWindow:
     def init_gui(self):
         #assert self.screen is not None, "self.screen cannot be None"
         self.gui = GUI(self.screen)
-        self.gui.add_button((0, 0), 200, 100, callback_sample, ())
+        but = self.gui.add_text_button((200, 200), 160, 40, "CLICK!", callback_sample, ())
+        but.style.set_border((0, 0, 244), 2)
+        but.set_font("Envy Code R Regular", True, True)
 
     def init_pygame(self):
         pg.init()
@@ -36,10 +38,18 @@ class DisplayWindow:
             for event in pg.event.get():
                 if event.type == pg.QUIT:
                     self.running = False
-            
+
             mouse_pos = pg.mouse.get_pos()
+            
+
+            ## drawing section ##
+            self.screen.fill((248, 255, 184))
+
             if self.gui:
                 self.gui.update(event, mouse_pos)
                 self.gui.draw()
+
+            pg.display.update()
+            self.clock.tick(const.FPS)
 
 
