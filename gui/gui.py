@@ -97,13 +97,14 @@ class Color:
 
 
     @classmethod
-    def new_lightened(cls, color):
+    def new_scaled(cls, scale, color):
 
-        def lighten_color(c):
-            return int( min(c * 1.2, 255) )
+        def scale_color(c):
+            return int( min(c * scale, 255) )
 
-        r, g, b = list(map(lighten_color, (color.r, color.g, color.b)))
+        r, g, b = list(map(scale_color, (color.r, color.g, color.b)))
         return cls(r, g, b) 
+
 
 
 
@@ -111,7 +112,7 @@ class Color:
 @dataclass
 class GUIStyle:
     bg_color = Color()
-    bg_hover_color = Color.new_lightened(bg_color)
+    bg_hover_color = Color.new_scaled(1.2, bg_color)    # lightened
     fg_color = Color(255, 255, 255)
     
     font = 'Envy Code R Regular'    # string - system font name
@@ -138,6 +139,9 @@ class Button(GUIElem):
         color = self.style.bg_color
         if self.state.test(ElemState.HOVER):
             color = self.style.bg_hover_color
+        # darkened color
+        if self.state.test(ElemState.PRESSED):
+            color = Color.new_scaled(0.8, color)
         
         pg.draw.rect(self.screen, color.raw, self.rect)
 
