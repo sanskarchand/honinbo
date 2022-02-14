@@ -18,9 +18,9 @@ class Move:
     
   
     def __repr__(self):
-        pl = ['B', 'W'][seq_id % 2]
+        pl = ['B', 'W'][self.seq_id % 2]
 
-        return f'M<{self.req_id},{pl},{self.value}>'
+        return f'M<{self.seq_id},{pl},{self.value}>'
         
 @dataclass
 class Result:
