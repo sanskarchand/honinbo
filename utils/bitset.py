@@ -22,12 +22,14 @@ class BitSet:
         """
         state -> an ElemState enum
         """
-        self.field |= state
-    
+        if not self.test(state):
+            self.field |= state
+
     @check_state
     def clear(self, state):
-        self.field &= ~state
-
+        if self.test(state):
+            self.field &= ~state
+    
     @check_state
     def test(self, state):
         return self.field & state

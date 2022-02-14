@@ -35,19 +35,19 @@ class DisplayWindow:
 
     def mainloop(self):
         while self.running:
-            for event in pg.event.get():
-                if event.type == pg.QUIT:
-                    self.running = False
 
             mouse_pos = pg.mouse.get_pos()
             
+            for event in pg.event.get():
+                if event.type == pg.QUIT:
+                    self.running = False
+                else:
+                    self.gui.update(event, mouse_pos)
 
             ## drawing section ##
             self.screen.fill((248, 255, 184))
 
-            if self.gui:
-                self.gui.update(event, mouse_pos)
-                self.gui.draw()
+            self.gui.draw()
 
             pg.display.update()
             self.clock.tick(const.FPS)

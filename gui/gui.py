@@ -41,11 +41,11 @@ class GUIElem:
         self.state.flip(ElemState.PRESSED)
 
 
-    def onclick():
+    def onclick(self):
         """<to be overridden>"""
         pass
 
-    def draw():
+    def draw(self):
         """<to be overridden>"""
         pass
 
@@ -55,10 +55,9 @@ class GUIElem:
         """
         if self.rect.collidepoint(mouse_pos):
             self.state.set(ElemState.HOVER)
-
+                
             if event.type == pg.MOUSEBUTTONDOWN:
-                if not self.state.test(ElemState.PRESSED):
-                    self.state.set(ElemState.PRESSED)
+                self.state.set(ElemState.PRESSED)
 
             elif event.type == pg.MOUSEBUTTONUP:
                 # only counts as a click if the elem
