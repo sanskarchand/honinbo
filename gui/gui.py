@@ -1,3 +1,4 @@
+from utils.bitset import BitSet
 import pygame as pg
 from enum import IntFlag
 from dataclasses import dataclass
@@ -18,6 +19,7 @@ class GUIElem:
         self.style = GUIStyle()
         self.callback = None        # a hook for the programmer
         self.callback_args = []     # tuple of references
+        self.state = BitSet()
 
         self.rect = pg.rect.Rect(self.pos[0], self.pos[1], width, height)
 
@@ -36,10 +38,7 @@ class GUIElem:
         self.style = style
     
     def flip_state(self):
-        if self.state & ElemState.PRESSED:
-            self.state &= ~ElemState.PRESSED
-        else:
-            self.state |= ElemState.RAISED
+        self.state.flip(ElemState.PRESSED)
 
 
     def onclick():
@@ -55,17 +54,17 @@ class GUIElem:
         The base class only 
         """
         if self.rect.collidepoint(mouse_pos):
-            self.state |= ElemState.HOVER
+            self.state.set(ElemState.HOVER)
 
             if event.type == pg.MOUSEBUTTONDOWN:
-                self.state &= ElemState.PRESSED
-                self.state &= ~ElemState.HOVER
+                if not self.state.test(ElemState.PRESSED):
+                    self.state.set(ElemState.PRESSED)
 
             elif event.type == pg.MOUSEBUTTONUP:
                 # only counts as a click if the elem
                 # was previously pressed
-                if self.state & ElemState.PRESSED:
-                    self.flip_state()   # back to released 
+                if self.state.test(ElemState.PRESSED):
+                    self.state.clear(ElemState.PRESSED)
                     self.onclick()
                     if self.callback:
                         self.callback(*self.callback_args)
@@ -73,8 +72,8 @@ class GUIElem:
             # to cancel an action, simply move the cursor
             # out of the bounding box to safely clear
             # the pressed state
-            self.state &= ~ElemState.PRESSED
-            self.state &= ~ElemState.HOVER
+            self.state.clear(ElemState.PRESSED)
+            self.state.clear(ElemState.HOVER)
 
 class  ElemState(IntFlag):
     """
@@ -84,6 +83,7 @@ class  ElemState(IntFlag):
     NONE = 0x0 
     PRESSED = 0x1       
     HOVER = 0x2 
+    
 
 class Color:
     def __init__(self, r=148, g=255, b=147):
@@ -133,12 +133,11 @@ class GUIStyle:
 class Button(GUIElem):
     def __init__(self, screen, pos, width, height):
         super().__init__(screen, pos, width, height)
-        self.state = 0          # state flags
        
 
     def draw(self):
         color = self.style.bg_color
-        if self.state & ElemState.HOVER:
+        if self.state.test(ElemState.HOVER):
             color = self.style.bg_hover_color
         
         pg.draw.rect(self.screen, color.raw, self.rect)
