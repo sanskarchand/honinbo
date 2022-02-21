@@ -31,7 +31,6 @@ def parse_property(game, my_data):
 
         for idx, char in enumerate(data):
             if char == ']':
-                length = idx + 1            # length for '[ab]W[cd])"  is  4
                 break
 
         prop_val = data[1:idx]
@@ -95,7 +94,6 @@ def parse(file_data):
     Method: Naive. Look for (property, value) pairs.
     Errors out on incorrect syntax.
     '''
-    logger.info('Parsing started')
 
     game = Game()
 
@@ -119,7 +117,8 @@ def parse(file_data):
         elif char == ')':
             cur_data = ''
     
-    logger.info('Parsing finished')
+    logger.info('Parsing finished for ' + game.player_names[0] + ' vs ' +  game.player_names[1])
+
     return game
 
 

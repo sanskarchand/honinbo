@@ -158,7 +158,7 @@ class Button(GUIElem):
         pg.draw.rect(self.screen, color.raw, self.rect)
 
         # draw border
-        if self.style.border_width != 0:
+        if self.style.border_width:
             pg.draw.rect(self.screen, self.style.border_color.raw,
                     self.rect, self.style.border_width)
 

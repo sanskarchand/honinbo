@@ -41,10 +41,7 @@ class DisplayWindow:
         but2.style.set_border((0, 0, 244), 2)
         but2.set_font("Envy Code R Regular", True, True)
 
-
-        cont.push_item(but)
-        cont.push_item(but2)
-        #cont.push_items(but, but2)
+        cont.push_items(but, but2)
         self.gui.add_elem(cont)
 
     
