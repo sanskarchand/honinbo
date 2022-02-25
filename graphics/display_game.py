@@ -1,6 +1,7 @@
 from core.game import Game, Move, Result
 import const
 from gui.gui import GUI, Color, Orientation
+from graphics.board import Board
 import pygame as pg
 
 
@@ -15,8 +16,11 @@ class DisplayWindow:
         self.clock = None
         self.gui = None
         self.game = None
+        self.board = None
         
+        # upper 12
         self.board_rect = pg.Rect(0, 0, const.TOTAL_DIM[0]-80, const.TOTAL_DIM[1]-80)
+        # lower 1280 x 80 rectangle
         self.bh_rect = pg.Rect(0, const.TOTAL_DIM[1] - 80, const.TOTAL_DIM[0], 80)
 
         self.init_pygame()
@@ -24,6 +28,7 @@ class DisplayWindow:
 
     def set_game(self, game):
         self.game = game
+        self.board = Board(self.game, self.screen, self.board_rect)
 
     def init_gui(self):
         #assert self.screen is not None, "self.screen cannot be None"
@@ -75,6 +80,7 @@ class DisplayWindow:
             
             self.draw_gui_extras()
             self.gui.draw()
+            self.board.draw()
 
             pg.display.update()
             self.clock.tick(const.FPS)
