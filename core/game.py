@@ -48,7 +48,9 @@ class Game:
     the sequence of moves, the outcome, and some
     metadata (e.g. players' names, ranks, etc.)
     """
-
+    
+    # parsed from a file, normally
+    # so the values are all set after utils.parser is done
     def __init__(self):
         self.move_seq = []
         self.event = ''
@@ -56,6 +58,21 @@ class Game:
         self.player_names = ['PB', 'PW']
         self.komi = -1
         self.result = Result()
+
+        self.cur_move_id = -1
+        self.current_stones = []
+
+    def next_move(self):
+        if self.cur_move_id != len(self.move_seq) - 1:
+            self.cur_move_id += 1
+            self.current_stones.append(self.move_seq[self.cur_move_id])
+            # evalute dead stones here
+
+    def prev_move(self):
+        if self.cur_move_id > 0:
+            self.cur_move_id -= 1
+            # evaluate stones
+
 
     def __repr__(self):
         return '\n'.join([

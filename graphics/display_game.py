@@ -10,12 +10,12 @@ def callback_sample(string):
 
 class DisplayWindow:
 
-    def __init__(self):
+    def __init__(self, game):
         self.running = True
-        self.cur_move_idx = 0
+        self.cur_move_idx = -1
         self.clock = None
         self.gui = None
-        self.game = None
+        self.game = game
         self.board = None
         
         # upper 12
@@ -26,6 +26,9 @@ class DisplayWindow:
         self.init_pygame()
         self.init_gui()
 
+        self.board = Board(self.game, self.screen, self.board_rect)
+   
+    # unnecessary right now
     def set_game(self, game):
         self.game = game
         self.board = Board(self.game, self.screen, self.board_rect)
@@ -37,11 +40,11 @@ class DisplayWindow:
         cont = self.gui.make_horizontal_container((self.bh_rect.x, self.bh_rect.y), self.bh_rect.w, self.bh_rect.h)
         cont.margin = (0, 20)
 
-        but = self.gui.make_text_button((200, 200), 160, 40, "CLICK!", callback_sample, ("click!",))
+        but = self.gui.make_text_button((200, 200), 160, 40, "PREV", callback_sample, ("click!",))
         but.style.set_border((0, 0, 244), 8)
         but.set_font("Envy Code R Regular", True, True)
         
-        but2 = self.gui.make_text_button((900, 200), 160, 40, "AHOY!", callback_sample, ("ahoy!",))
+        but2 = self.gui.make_text_button((900, 200), 160, 40, "NEXT", self.game.next_move, ())
         but2.style.bg_color = Color(200, 40, 0)
         but2.style.set_border((0, 0, 244), 2)
         but2.set_font("Envy Code R Regular", True, True)

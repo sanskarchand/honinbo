@@ -8,8 +8,7 @@ def main():
     print(g)
     #print(g.move_seq)
 
-    dw = DisplayWindow()
-    dw.set_game(g)
+    dw = DisplayWindow(g)
     dw.mainloop()
 
 

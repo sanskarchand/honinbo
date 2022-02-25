@@ -8,6 +8,7 @@ CELL_SIZE = 40
 STONE_SIZE = 40
 HOR_LABELS = list(map(str, range(1, 20)))
 VERT_LABELS = HOR_LABELS
+#VERT_LABELS = ['一', '二', '三', '四', '五']
 STAR_POINTS = [
     (4, 4), (10, 4), (16, 4),
     (4, 10), (10, 10), (16, 10),

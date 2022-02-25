@@ -27,23 +27,32 @@ class Board:
         self.screen = screen
         self.board_rect = board_rect
         self.actual_board_rect = board_rect     # after margins are accounted for 
+        self.overall_board_rect = board_rect    # extra padding for corner stones
 
         self.move_idx = 0
 
         self.black_stone_img = pg.image.load(BLACK_STONE_IMGPATH)
         self.white_stone_img = pg.image.load(WHITE_STONE_IMGPATH)
+
+        self.black_stone_img = pg.transform.scale(self.black_stone_img, (CELL_SIZE, CELL_SIZE))
+        self.white_stone_img = pg.transform.scale(self.white_stone_img, (CELL_SIZE, CELL_SIZE))
+
         self.goban_tile_img = pg.image.load(GOBAN_TILE_IMGPATH)
         self.goban_tile_rect = self.goban_tile_img.get_rect()
 
         self.font = pg.font.SysFont(FONT, FONT_SIZE)
 
-        self.margin = 50
+        self.margin = 100
         self.calc_everything()
 
+
+
     def make_board_surface(self):
-        self.board_surf = pg.Surface((18 * CELL_SIZE, 18 * CELL_SIZE))
-        for i in range(19):
-            for j in range(19):
+        # 20 = 18 + 2, to account for overall_board
+        self.board_surf = pg.Surface((20 * CELL_SIZE, 20 * CELL_SIZE))
+        # for overall_board
+        for i in range(19 + 2):
+            for j in range(19 + 2):
                 pos = (i * CELL_SIZE, j * CELL_SIZE)
                 self.board_surf.blit(self.goban_tile_img, pos)
 
@@ -58,6 +67,14 @@ class Board:
 
         self.actual_board_rect = pg.Rect(self.margin, self.margin, 
                                         CELL_SIZE * 18, CELL_SIZE * 18)
+        
+        self.overall_board_rect = pg.Rect(
+                self.margin - CELL_SIZE,
+                self.margin - CELL_SIZE,
+                CELL_SIZE * 19,
+                CELL_SIZE * 19
+        )
+
         self.make_board_surface()
         
     def set_margin(margin):
@@ -79,6 +96,22 @@ class Board:
         j = pos[1] - 1
         return (self.margin + i * CELL_SIZE, self.margin + j * CELL_SIZE)
 
+    def sgf_to_game_coords(self, sgf_pos):
+        i = ord(sgf_pos[0]) - ord('a') + 1
+        j = ord(sgf_pos[1]) - ord('a') + 1
+        return (i, j)
+
+    def draw_game_stones(self):
+        # these are filtered movies i.e. the captured
+        # stones can be erased
+        for move in self.game.current_stones:
+            coords = self.sgf_to_game_coords(move.value)
+            dest = self.game_to_screen_coords(coords)
+            dest = (dest[0] - CELL_SIZE/2, dest[1] - CELL_SIZE/2)
+
+            img = self.white_stone_img if move.seq_id % 2 == 1 else self.black_stone_img
+            self.screen.blit(img, dest)
+
 
     def draw(self):
         # draw the board first, then the grid, and then the stones
@@ -97,7 +130,7 @@ class Board:
         
                 
         # draw board rect with tiled images
-        self.screen.blit(self.board_surf, (self.margin, self.margin))
+        self.screen.blit(self.board_surf, (self.margin - CELL_SIZE, self.margin - CELL_SIZE))
 
         #draw rect around board
         pg.draw.rect(self.screen, (0, 0, 0), self.actual_board_rect, 2)
@@ -132,17 +165,20 @@ class Board:
         # (1, 1) is top left, japanese style
         # draw horizontal labels (columns)
         pos_x = self.margin - 5
-        pos_y = self.margin/2
+        pos_y = self.margin/3
         for i, label_x in enumerate(HOR_LABELS):
             pos = (pos_x + i * CELL_SIZE, pos_y)
             text_img = self.font.render(label_x, True, FONT_COLOR)
             self.screen.blit(text_img, pos) 
         
         pos_y = self.margin - 5
-        pos_x = self.margin/2
+        pos_x = self.margin/3
         # draw vertical labels (ranks)
         for j, label_y in enumerate(VERT_LABELS):
             pos = (pos_x, pos_y + j * CELL_SIZE)
             text_img = self.font.render(label_y, True, FONT_COLOR)
             self.screen.blit(text_img, pos)
+        
 
+        # draw a stone
+        self.draw_game_stones() 
