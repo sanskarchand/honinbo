@@ -40,6 +40,13 @@ class Board:
         self.margin = 50
         self.calc_everything()
 
+    def make_board_surface(self):
+        self.board_surf = pg.Surface((18 * CELL_SIZE, 18 * CELL_SIZE))
+        for i in range(19):
+            for j in range(19):
+                pos = (i * CELL_SIZE, j * CELL_SIZE)
+                self.board_surf.blit(self.goban_tile_img, pos)
+
     def calc_everything(self):
         '''
         self.full_width = self.board_rect.width - self.margin * 2
@@ -51,6 +58,7 @@ class Board:
 
         self.actual_board_rect = pg.Rect(self.margin, self.margin, 
                                         CELL_SIZE * 18, CELL_SIZE * 18)
+        self.make_board_surface()
         
     def set_margin(margin):
         self.margin = margin
@@ -86,9 +94,10 @@ class Board:
                 self.screen.blit(self.goban_tile_img, pos_rect)
                 pg.draw.rect(self.screen, (255, 0, 0), pos_rect)
         '''
-
-        # draw board
-        pg.draw.rect(self.screen, (165,42,42), self.actual_board_rect)
+        
+                
+        # draw board rect with tiled images
+        self.screen.blit(self.board_surf, (self.margin, self.margin))
 
         #draw rect around board
         pg.draw.rect(self.screen, (0, 0, 0), self.actual_board_rect, 2)
