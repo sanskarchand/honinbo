@@ -104,13 +104,22 @@ class Board:
     def draw_game_stones(self):
         # these are filtered movies i.e. the captured
         # stones can be erased
-        for move in self.game.current_stones:
+        for idx, move in enumerate(self.game.current_stones):
             coords = self.sgf_to_game_coords(move.value)
             dest = self.game_to_screen_coords(coords)
-            dest = (dest[0] - CELL_SIZE/2, dest[1] - CELL_SIZE/2)
+            dest = (dest[0] - STONE_SIZE/2, dest[1] - STONE_SIZE/2)
 
             img = self.white_stone_img if move.seq_id % 2 == 1 else self.black_stone_img
             self.screen.blit(img, dest)
+            
+            # mark the latest move
+            if idx == len(self.game.current_stones) - 1:
+                # half the size of the img
+                rect = img.get_rect()
+                rect.x, rect.y = dest[0] + STONE_SIZE/3, dest[1] + STONE_SIZE/3
+                rect.w /= 4
+                rect.h /= 4
+                pg.draw.rect(self.screen, (0, 0, 255), rect)
 
 
     def draw(self):

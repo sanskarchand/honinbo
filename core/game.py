@@ -62,6 +62,9 @@ class Game:
         self.cur_move_id = -1
         self.current_stones = []
 
+        self.captured_moves = {}    # seq_id -> Move
+
+
     def next_move(self):
         if self.cur_move_id != len(self.move_seq) - 1:
             self.cur_move_id += 1
@@ -71,7 +74,11 @@ class Game:
     def prev_move(self):
         if self.cur_move_id > 0:
             self.cur_move_id -= 1
+            self.current_stones.pop()
             # evaluate stones
+
+    def remove_dead_stones(self):
+        pass
 
 
     def __repr__(self):

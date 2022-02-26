@@ -40,7 +40,7 @@ class DisplayWindow:
         cont = self.gui.make_horizontal_container((self.bh_rect.x, self.bh_rect.y), self.bh_rect.w, self.bh_rect.h)
         cont.margin = (0, 20)
 
-        but = self.gui.make_text_button((200, 200), 160, 40, "PREV", callback_sample, ("click!",))
+        but = self.gui.make_text_button((200, 200), 160, 40, "PREV", self.game.prev_move, ())
         but.style.set_border((0, 0, 244), 8)
         but.set_font("Envy Code R Regular", True, True)
         
