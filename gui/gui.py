@@ -103,7 +103,13 @@ class Color:
         self.r = r
         self.g = g
         self.b = b
-        self.raw = (self.r, self.g, self.b)
+
+    def is_unset(self):
+        return (self.r == self.g == self.b ==  None)
+    
+    @property
+    def raw(self):
+        return (self.r, self.g, self.b)
 
     def __repr__(self):
         #return f"<Color>({self.r},{self.g},{self.b})</Color>"
@@ -138,6 +144,45 @@ class GUIStyle:
     def set_border(self, b_col, b_width):
         self.border_color = Color(b_col[0], b_col[1], b_col[2])
         self.border_width = b_width
+
+class Label(GUIElem):
+    def __init__(self, screen, pos, width, height):
+        """
+            width, height are useless for the time being,
+            but they may later be used for clipping.
+        """
+        super().__init__(screen, pos, width, height)
+        self.font = self.font = self.make_pygame_font()
+        self.style.bg_color = Color(None, None, None)   # no bg
+        self.text = ''
+    
+    # TODO: separate parent class for text-based behaviour
+    def set_text(self, text):
+        self.text = text 
+        return self         # chaining
+
+    #NOTE: redundant 
+    def make_pygame_font(self):
+        self.style.font_size = int(RATIO * self.rect.height)
+        return pg.font.SysFont(self.style.font,
+                        self.style.font_size,
+                        self.style.font_bold,
+                        self.style.font_italic)
+
+    def draw(self):
+        # draw a bg, if an actual color is given
+        if not self.style.bg_color.is_unset:
+            pg.draw.rect(self.screen, self.style.bg_color, self.rect)
+
+        # handle newlines, too
+        lines = self.text.split('\n')
+        dh = 0
+        for line in lines: 
+            text_surface = self.font.render(line, False, self.style.font_color.raw)
+            self.screen.blit(text_surface, (self.pos[0], self.pos[1] + dh))
+            dh += self.style.font_size//2 + const.LINE_GAP
+
+
 
 
 
@@ -291,6 +336,10 @@ class GUI:
     def make_text_button(self, pos, width, height, text, callback, callback_args):
         return (TextButton(self.screen, pos, width, height, text)
                 .set_callback(callback, callback_args))
+
+    def make_label(self, pos, width, height, text):
+        return (Label(self.screen, pos, width, height)
+                .set_text(text))
         
     def update(self, event, mouse_pos):
         for elem in self.elems:
