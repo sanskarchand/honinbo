@@ -26,7 +26,8 @@ class GUIElem:
 
     def make_rect(self):
         return pg.rect.Rect(self.pos[0], self.pos[1], self.width, self.height)
-
+    
+    # NOTE: just use @property?
     def set_pos(self, pos):
         self.pos = pos
         self.rect.x, self.rect.y = pos
@@ -205,8 +206,6 @@ class Label(GUIElem):
             text_surface = self.font.render(line, False, self.style.font_color.raw)
             self.screen.blit(text_surface, (self.pos[0], self.pos[1] + dh))
             dh += self.style.font_size//2 + const.LINE_GAP
-        
-
 
 
 
@@ -304,12 +303,19 @@ class Container(GUIElem):
                 new_y = last_item.pos[1] + (self.direction) * (last_item.height + self.gap)
                 item.set_pos((last_item.pos[0], new_y))
         else:
-            item.set_pos(self.pos)
+            pos = self.pos
+
             if self.direction == -1:
                 if self.orientation == Orientation.HORIZONTAL:
                     pos = self.pos[0] - item.width, self.pos[1]
                 else:
                     pos = self.pos[0], self.pos[1] - item.height
+            
+            # we need only apply the margin to the first
+            # item, since subsequent items look to  last_item for
+            # positioning info
+            pos = (self.margin[0] + pos[0], self.margin[1] + pos[1])
+            item.set_pos(pos)
 
         self.items.append(item)
 

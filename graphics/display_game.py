@@ -45,7 +45,7 @@ class DisplayWindow:
         self.gui = GUI(self.screen)
 
         cont = self.gui.make_horizontal_container((self.bh_rect.x, self.bh_rect.y), self.bh_rect.w, self.bh_rect.h)
-        cont.margin = (0, 20)
+        cont.margin = (10, 10)
 
 
         but = self.gui.make_text_button((200, 200), 160, 40, "PREV", self.prev_move, ())
@@ -59,6 +59,8 @@ class DisplayWindow:
         cont.push_items(but, but2)
 
         label_cont = self.gui.make_vertical_container(self.bv_rect.topleft, *self.bv_rect.size)
+        label_cont.margin = (20, 0)
+
         label_1 = self.gui.make_label(const.POS_UNDEF, 80, 40, "Go\nis\nAwesome")
         self.move_label = self.gui.make_label(const.POS_UNDEF, 80, 40, "Move: 0")
         label_cont.push_items(label_1, self.move_label)
