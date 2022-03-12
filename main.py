@@ -4,11 +4,12 @@ from graphics.display_game import DisplayWindow
 
 def main():
 
-    g = parser.parse_from_file('cho_chikun_v_tanaka_go4go.sgf')
+    g = parser.parse_from_file('ShusakuvsInseki_EarReddening.sgf')
     print(g)
     #print(g.move_seq)
 
     dw = DisplayWindow(g)
+    dw.set_title()
     dw.mainloop()
 
 

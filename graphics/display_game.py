@@ -41,20 +41,19 @@ class DisplayWindow:
         cont.margin = (0, 20)
 
         but = self.gui.make_text_button((200, 200), 160, 40, "PREV", self.game.prev_move, ())
-        but.style.set_border((0, 0, 244), 8)
-        but.set_font("Envy Code R Regular", True, True)
+        but.style.set_border((0, 0, 0), 1)
+        but.set_font("Envy Code R Regular")
         
         but2 = self.gui.make_text_button((900, 200), 160, 40, "NEXT", self.game.next_move, ())
-        but2.style.bg_color = Color(200, 40, 0)
-        but2.style.set_border((0, 0, 244), 2)
-        but2.set_font("Envy Code R Regular", True, True)
+        but2.style.set_border((0, 0, 0), 1)
+        but2.set_font("Envy Code R Regular", font_bold=False, font_italic=False)
 
         cont.push_items(but, but2)
         self.gui.add_elem(cont)
 
     
     def draw_gui_extras(self):
-        pg.draw.rect(self.screen, (155, 155, 155), self.bh_rect)
+        pg.draw.rect(self.screen, (47, 152, 127), self.bh_rect)
 
     def init_pygame(self):
         pg.init()
@@ -63,6 +62,11 @@ class DisplayWindow:
         self.screen = pg.display.set_mode(const.TOTAL_DIM)
         pg.display.set_caption("Honinbo - SGF viewer")
         self.clock = pg.time.Clock()
+
+    def set_title(self):
+        vs_string = self.game.player_names[0] + " vs " + self.game.player_names[1]
+        pg.display.set_caption("Honinbo : " + vs_string)
+
 
     def mainloop(self):
         assert self.game is not None, "DisplayWindow: no game set"

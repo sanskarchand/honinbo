@@ -13,6 +13,9 @@ class Move:
            location: pq, cd(3x4), etc.
            action: !! for pass
     """
+
+    # real moves have non-negative seq_id values
+    # for 'virtual moves', the author will use negative integers
     seq_id: int  = -1   # sequence number in moveset
     value: str  = '00'  # e.g. cd for 3x4 komoku, !! for pass
     

@@ -5,4 +5,4 @@
 3. GUI
 
 **Screenshots**
-![Viewer](screenshots/Screenshot_2022-02-26_02-03-27.png?raw=true)
+![Viewer](screenshots/Screenshot_2022-03-12_19-31-47.png?raw=true)

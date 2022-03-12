@@ -122,13 +122,13 @@ class Color:
 
 @dataclass
 class GUIStyle:
-    bg_color = Color()
+    bg_color = Color(222, 222, 222)
     bg_hover_color = None           # overrides default lightened color if set
     fg_color = Color(255, 255, 255)
     
     font = 'Envy Code R Regular'    # string - system font name
     font_size = None                # None means auto (acc. to width)
-    font_color = fg_color
+    font_color = Color(0, 0, 0)
     font_bold = False
     font_italic = False
 
@@ -169,7 +169,7 @@ class TextButton(Button):
         self.text = text
         self.font = self.make_pygame_font()
     
-    def set_font(self, font_name, font_bold, font_italic):
+    def set_font(self, font_name, font_bold=False, font_italic=False):
         self.style.font = font_name
         self.style.font_bold = font_bold
         self.style.font_italic = font_italic
