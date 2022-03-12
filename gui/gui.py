@@ -22,7 +22,10 @@ class GUIElem:
         self.callback_args = []     # tuple of references
         self.state = BitSet()
 
-        self.rect = pg.rect.Rect(self.pos[0], self.pos[1], width, height)
+        self.rect = self.make_rect()
+
+    def make_rect(self):
+        return pg.rect.Rect(self.pos[0], self.pos[1], self.width, self.height)
 
     def set_pos(self, pos):
         self.pos = pos
@@ -159,7 +162,23 @@ class Label(GUIElem):
     # TODO: separate parent class for text-based behaviour
     def set_text(self, text):
         self.text = text 
+        self.recalc_height()
         return self         # chaining
+    
+    def recalc_height(self):
+        lines = self.text.split('\n')
+        if len(lines) == 1:
+            return
+
+        dh = 0
+        self.height = 0
+        for line in lines: 
+            dh += self.style.font_size//2 + const.LINE_GAP
+            self.height += dh
+
+        self.height -= dh
+
+        self.rect = self.make_rect()
 
     #NOTE: redundant 
     def make_pygame_font(self):
@@ -170,6 +189,9 @@ class Label(GUIElem):
                         self.style.font_italic)
 
     def draw(self):
+        if const.DEBUG_DRAW:
+            pg.draw.rect(self.screen, (0, 0, 255), self.rect, 1)
+
         # draw a bg, if an actual color is given
         if not self.style.bg_color.is_unset:
             pg.draw.rect(self.screen, self.style.bg_color, self.rect)
@@ -177,11 +199,13 @@ class Label(GUIElem):
         # handle newlines, too
         lines = self.text.split('\n')
         dh = 0
+
         for line in lines: 
+            # NOTE: needn't create a new surf every time
             text_surface = self.font.render(line, False, self.style.font_color.raw)
             self.screen.blit(text_surface, (self.pos[0], self.pos[1] + dh))
             dh += self.style.font_size//2 + const.LINE_GAP
-
+        
 
 
 

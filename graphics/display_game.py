@@ -20,6 +20,8 @@ class DisplayWindow:
         self.gui = None
         self.game = game
         self.board = None
+
+        self.move_label = None
         
         # upper 12
         self.board_rect = pg.Rect(0, 0, const.TOTAL_DIM[0]-GUI_P, const.TOTAL_DIM[1]-GUI_P)
@@ -46,11 +48,11 @@ class DisplayWindow:
         cont.margin = (0, 20)
 
 
-        but = self.gui.make_text_button((200, 200), 160, 40, "PREV", self.game.prev_move, ())
+        but = self.gui.make_text_button((200, 200), 160, 40, "PREV", self.prev_move, ())
         but.style.set_border((0, 0, 0), 1)
         but.set_font("Envy Code R Regular")
         
-        but2 = self.gui.make_text_button((900, 200), 160, 40, "NEXT", self.game.next_move, ())
+        but2 = self.gui.make_text_button((900, 200), 160, 40, "NEXT", self.next_move, ())
         but2.style.set_border((0, 0, 0), 1)
         but2.set_font("Envy Code R Regular", font_bold=False, font_italic=False)
 
@@ -58,11 +60,20 @@ class DisplayWindow:
 
         label_cont = self.gui.make_vertical_container(self.bv_rect.topleft, *self.bv_rect.size)
         label_1 = self.gui.make_label(const.POS_UNDEF, 80, 40, "Go\nis\nAwesome")
-        label_cont.push_item(label_1)
+        self.move_label = self.gui.make_label(const.POS_UNDEF, 80, 40, "Move: 0")
+        label_cont.push_items(label_1, self.move_label)
 
 
         self.gui.add_elem(cont)
         self.gui.add_elem(label_cont)
+
+    def next_move(self):
+        self.game.next_move()
+        self.move_label.set_text(f"Move: {self.game.cur_move_id + 1}")
+
+    def prev_move(self):
+        self.game.prev_move()
+        self.move_label.set_text(f"Move: {self.game.cur_move_id + 1}")
 
     
     def draw_gui_extras(self):
