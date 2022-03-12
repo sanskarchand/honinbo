@@ -56,7 +56,9 @@ class DisplayWindow:
         but2.style.set_border((0, 0, 0), 1)
         but2.set_font("Envy Code R Regular", font_bold=False, font_italic=False)
 
-        cont.push_items(but, but2)
+        text_input = self.gui.make_text_input(const.POS_UNDEF, 160, 40)
+
+        cont.push_items(but, but2, text_input)
 
         label_cont = self.gui.make_vertical_container(self.bv_rect.topleft, *self.bv_rect.size)
         label_cont.margin = (20, 0)

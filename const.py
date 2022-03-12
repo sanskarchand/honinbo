@@ -2,7 +2,7 @@ import os
 
 TOTAL_DIM = (1280, 960)     # (640, 480)
 FPS = 60
-DEBUG_DRAW = False
+DEBUG_DRAW = True
 
 GUI_P = 80              # GUI sizing param; just for convenience
 
@@ -26,6 +26,6 @@ LINE_GAP = 5    # vertical gap; text rendering newline handling
 
 BLACK_STONE_IMGPATH = os.path.join("res", "black_stone_128pxsq.png")
 WHITE_STONE_IMGPATH = os.path.join("res", "white_stone_128pxsq.png")
-GOBAN_TILE_IMGPATH = os.path.join("res", "goban_tile.png")
-#GOBAN_TILE_IMGPATH = os.path.join("res", "goban_tile_blue.png")
+#GOBAN_TILE_IMGPATH = os.path.join("res", "goban_tile.png")
+GOBAN_TILE_IMGPATH = os.path.join("res", "goban_tile_blue.png")
 

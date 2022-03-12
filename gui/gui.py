@@ -18,10 +18,17 @@ class GUIElem:
         self.width = width
         self.height = height
         self.style = GUIStyle()
-
+        
+        # TODO: increase no. of callbacks (or add slots, ids, etc.)
         self.callback = None        # a hook for the programmer
         self.callback_args = []     # tuple of references
-        self.callback_on = ElemState.PRESSED    # callback cond.
+        self.callback_on = None     # target state, e.g. ElemState.PRESSED    
+
+        # to trigger, the mouse be within the elem's rect
+        # at the instant of the state transition
+        # NOTE: OR'ing ElemState.HOVER with callback_on wouldn't 
+        # work (think about negation)
+        self.callback_needs_mouse = False
 
         # defines which transition triggers the callback
         # i.e. True => triggered on unpressed to pressed,
@@ -75,8 +82,9 @@ class GUIElem:
         """
 
         old_state = BitSet(self.state.field)
+        cursor_on_me = self.rect.collidepoint(mouse_pos)
 
-        if self.rect.collidepoint(mouse_pos):
+        if cursor_on_me:
             self.state.set(ElemState.HOVER)
                 
             if event.type == pg.MOUSEBUTTONDOWN:
@@ -89,8 +97,6 @@ class GUIElem:
                 if self.state.test(ElemState.PRESSED):
                     self.state.clear(ElemState.PRESSED)
                     self.onclick()
-                    if self.callback:
-                        self.callback(*self.callback_args)
         else:
             # to cancel an action, simply move the cursor
             # out of the bounding box to safely clear
@@ -101,6 +107,25 @@ class GUIElem:
             # if the user clicks outside this elem, it's not in focus anymore
             if event.type == pg.MOUSEBUTTONUP:
                 self.state.clear(ElemState.FOCUSED)
+
+        if not self.callback:
+            return
+
+        if self.callback_needs_mouse and not cursor_on_me:
+            return
+
+        # check for state triggers (for callback)
+        target_state = self.callback_on
+
+        # on positive transition
+        if self.callback_positive:
+            if not old_state.test(target_state) and self.state.test(target_state):
+                self.callback(*self.callback_args)
+        else:
+            if old_state.test(target_state) and not self.state.test(target_state):
+                self.callback(*self.callback_args)
+            
+
 
 class ElemState(IntFlag):
     """
@@ -229,13 +254,32 @@ class TextInput(GUIElem):
 
     def __init__(self, screen, pos, width, height):
         super().__init__(screen, pos, width, height)
+        self.cursor_pos = -1
 
-    
+    def update(self, event, mouse_pos):
+        super().update(event, mouse_pos)
+        if not self.state.test(ElemState.FOCUSED):
+            return
+
+        # capture keyboard input for text
+
+        # capture keyboard input for copy-paste
+
+    def draw(self):
+        if const.DEBUG_DRAW:
+            pg.draw.rect(self.screen, (48, 48, 48), self.rect)
+
 
 
 class Button(GUIElem):
     def __init__(self, screen, pos, width, height):
         super().__init__(screen, pos, width, height)
+        
+        # trigger callback when button is released
+        #   with the cursor within the button
+        self.callback_on = ElemState.PRESSED
+        self.callback_positive = False
+        self.callback_needs_mouse = True
        
 
     def draw(self):
@@ -394,6 +438,9 @@ class GUI:
     def make_label(self, pos, width, height, text):
         return (Label(self.screen, pos, width, height)
                 .set_text(text))
+
+    def make_text_input(self, pos, width, height):
+        return TextInput(self.screen, pos, width, height)
         
     def update(self, event, mouse_pos):
         for elem in self.elems:
