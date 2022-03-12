@@ -18,8 +18,16 @@ class GUIElem:
         self.width = width
         self.height = height
         self.style = GUIStyle()
+
         self.callback = None        # a hook for the programmer
         self.callback_args = []     # tuple of references
+        self.callback_on = ElemState.PRESSED    # callback cond.
+
+        # defines which transition triggers the callback
+        # i.e. True => triggered on unpressed to pressed,
+        #   and the reverse when it's False
+        self.callback_positive = True  
+
         self.state = BitSet()
 
         self.rect = self.make_rect()
@@ -65,11 +73,15 @@ class GUIElem:
         """
         The base class only 
         """
+
+        old_state = BitSet(self.state.field)
+
         if self.rect.collidepoint(mouse_pos):
             self.state.set(ElemState.HOVER)
                 
             if event.type == pg.MOUSEBUTTONDOWN:
                 self.state.set(ElemState.PRESSED)
+                self.state.set(ElemState.FOCUSED)
 
             elif event.type == pg.MOUSEBUTTONUP:
                 # only counts as a click if the elem
@@ -86,6 +98,10 @@ class GUIElem:
             self.state.clear(ElemState.PRESSED)
             self.state.clear(ElemState.HOVER)
 
+            # if the user clicks outside this elem, it's not in focus anymore
+            if event.type == pg.MOUSEBUTTONUP:
+                self.state.clear(ElemState.FOCUSED)
+
 class ElemState(IntFlag):
     """
     If PRESSED isn't present in a flag bitset,
@@ -94,6 +110,7 @@ class ElemState(IntFlag):
     NONE = 0x0 
     PRESSED = 0x1       
     HOVER = 0x2 
+    FOCUSED = 0x4
 
 # for containers
 class Orientation(IntFlag):
@@ -207,6 +224,13 @@ class Label(GUIElem):
             self.screen.blit(text_surface, (self.pos[0], self.pos[1] + dh))
             dh += self.style.font_size//2 + const.LINE_GAP
 
+
+class TextInput(GUIElem):
+
+    def __init__(self, screen, pos, width, height):
+        super().__init__(screen, pos, width, height)
+
+    
 
 
 class Button(GUIElem):

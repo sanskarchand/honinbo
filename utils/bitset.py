@@ -16,6 +16,9 @@ def check_state(func):
 @dataclass
 class BitSet:
     field = 0
+
+    def __init__(self, field=0):
+        self.field = field
     
     @check_state
     def set(self, state):
