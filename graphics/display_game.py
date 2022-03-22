@@ -20,7 +20,9 @@ class DisplayWindow:
         self.gui = None
         self.game = game
         self.board = None
+        
 
+        self.jump_to = None
         self.move_label = None
         
         # upper 12
@@ -56,14 +58,19 @@ class DisplayWindow:
         but2.style.set_border((0, 0, 0), 1)
         but2.set_font("Envy Code R Regular", font_bold=False, font_italic=False)
 
-        text_input = self.gui.make_text_input(const.POS_UNDEF, 160, 40)
+        text_input = self.gui.make_text_input(const.POS_UNDEF, 160, 40).connect(self.move_input_callback)
+        text_input.set_font("Envy Code R Regular", font_bold=False, font_italic=False)
+        text_input.style.bg_color = Color.from_hex('#ffffff')
 
-        cont.push_items(but, but2, text_input)
+        jump_btn = self.gui.make_text_button(const.POS_UNDEF, 80, 40, "GO", self.jump_to_move, ())
+
+        cont.push_items(but, but2, text_input, jump_btn)
 
         label_cont = self.gui.make_vertical_container(self.bv_rect.topleft, *self.bv_rect.size)
         label_cont.margin = (20, 0)
 
-        label_1 = self.gui.make_label(const.POS_UNDEF, 80, 40, "Go\nis\nAwesome")
+        label_1 = self.gui.make_label(const.POS_UNDEF, 160, 40, "Go\nis\nAwesome")
+        label_1.style.bg_color = Color.from_hex('#87F1BD')
         self.move_label = self.gui.make_label(const.POS_UNDEF, 80, 40, "Move: 0")
         label_cont.push_items(label_1, self.move_label)
 
@@ -78,6 +85,13 @@ class DisplayWindow:
     def prev_move(self):
         self.game.prev_move()
         self.move_label.set_text(f"Move: {self.game.cur_move_id + 1}")
+
+    def jump_to_move(self):
+        print("Should jump to: ", self.jump_to)
+
+    def move_input_callback(self, text):
+        if text.isdecimal() and int(text) > 0:
+            self.jump_to = int(text) - 1
 
     
     def draw_gui_extras(self):

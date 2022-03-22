@@ -2,7 +2,7 @@ import os
 
 TOTAL_DIM = (1280, 960)     # (640, 480)
 FPS = 60
-DEBUG_DRAW = True
+DEBUG_DRAW = False
 
 GUI_P = 80              # GUI sizing param; just for convenience
 

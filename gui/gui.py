@@ -34,6 +34,11 @@ class GUIElem:
         # i.e. True => triggered on unpressed to pressed,
         #   and the reverse when it's False
         self.callback_positive = True  
+        
+        # <event callback>
+        # connected func; a callback used for signaling mostly
+        # e.g.when text changes in an input field
+        self.cfunc = None        
 
         self.state = BitSet()
 
@@ -58,6 +63,10 @@ class GUIElem:
         self.callback_args = args_tuple
         return self     
     
+    def connect(self, callback):
+        self.cfunc = callback
+        return self
+
     def set_style(self, style):
         """
         style: an object of type GUIStyle
@@ -170,6 +179,25 @@ class Color:
 
         r, g, b = list(map(scale_color, (color.r, color.g, color.b)))
         return cls(r, g, b) 
+    
+    @classmethod
+    def from_hex(cls, hex_string):
+        if not hex_string:
+            return
+
+        if hex_string[0] == '#':
+            hex_string = hex_string[1:]
+
+        if len(hex_string) < 6:
+            return
+
+        r = int(hex_string[:2], 16)
+        g = int(hex_string[2:4], 16)
+        b = int(hex_string[4:6], 16)
+
+        return cls(r, g, b)
+
+
 
 
 @dataclass
@@ -236,8 +264,8 @@ class Label(GUIElem):
             pg.draw.rect(self.screen, (0, 0, 255), self.rect, 1)
 
         # draw a bg, if an actual color is given
-        if not self.style.bg_color.is_unset:
-            pg.draw.rect(self.screen, self.style.bg_color, self.rect)
+        if not self.style.bg_color.is_unset():
+            pg.draw.rect(self.screen, self.style.bg_color.raw, self.rect)
 
         # handle newlines, too
         lines = self.text.split('\n')
@@ -254,21 +282,79 @@ class TextInput(GUIElem):
 
     def __init__(self, screen, pos, width, height):
         super().__init__(screen, pos, width, height)
+        self.text = ''
         self.cursor_pos = -1
+        self.font = self.make_pygame_font()
+    
+    def set_font(self, font_name, font_bold=False, font_italic=False):
+        self.style.font = font_name
+        self.style.font_bold = font_bold
+        self.style.font_italic = font_italic
+        self.font = self.make_pygame_font()
+
+    def make_pygame_font(self):
+        self.style.font_size = int(RATIO * self.rect.height)
+        return pg.font.SysFont(self.style.font,
+                        self.style.font_size,
+                        self.style.font_bold,
+                        self.style.font_italic)
 
     def update(self, event, mouse_pos):
         super().update(event, mouse_pos)
         if not self.state.test(ElemState.FOCUSED):
             return
+        
 
-        # capture keyboard input for text
+        keys = pg.key.get_pressed()
 
+        if event.type == pg.KEYDOWN:
+
+            # alphanumeric input
+            if event.key >= ord('a') and event.key <= ord('z'):
+                if keys[pg.K_LSHIFT] or keys[pg.K_RSHIFT]:
+                    self.text += chr(event.key - 32)
+                else:
+                    self.text += chr(event.key)
+
+            if event.key >= ord('0') and event.key <= ord('9'):
+                self.text += chr(event.key)
+
+            if event.key == pg.K_SPACE:
+                self.text += ' '
+            
+            # backspace
+            if keys[pg.K_BACKSPACE]:
+                self.text = self.text[:-1]
+            
+            # invoke callback on keydown
+            if self.cfunc:
+                self.cfunc(self.text)
+        
+        # 97 to 122, 48 to 57
         # capture keyboard input for copy-paste
 
+        
+        
     def draw(self):
         if const.DEBUG_DRAW:
             pg.draw.rect(self.screen, (48, 48, 48), self.rect)
 
+        # draw bg white
+        pg.draw.rect(self.screen, self.style.bg_color.raw, self.rect)
+
+        # draw border rectangle
+        pg.draw.rect(self.screen, Color(0, 0, 0).raw, self.rect, 3)
+        
+        text = self.text
+        if self.state.test(ElemState.FOCUSED):
+            text += "|"
+
+        text_surface = self.font.render(text, False, self.style.font_color.raw)
+        cropped_region = (0, 0, self.rect.width-3, self.rect.height)
+        textpos = (self.pos[0] + 3, self.pos[1] + 3)
+
+        self.screen.blit(text_surface, textpos, cropped_region)
+        #self.screen.blit(text_surface, textpos)
 
 
 class Button(GUIElem):
